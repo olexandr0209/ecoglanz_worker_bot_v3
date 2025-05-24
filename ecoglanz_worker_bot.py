@@ -7,6 +7,10 @@ import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 import json
 
+import pkg_resources
+print("📦 Встановлені пакети:", [p.project_name for p in pkg_resources.working_set])
+
+
 ADMIN_ID = 929619425
 
 # Завантаження списку працівників з файлу
