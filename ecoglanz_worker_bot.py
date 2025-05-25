@@ -104,6 +104,7 @@ def main():
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("orders", list_orders))
     app.add_handler(CallbackQueryHandler(handle_take_order, pattern="^take_"))
+    telegram.error.Conflict: can't use getUpdates method while webhook is active
 
     print("🚀 EcoGlanz Workers бот запущено!")
     app.run_polling()
