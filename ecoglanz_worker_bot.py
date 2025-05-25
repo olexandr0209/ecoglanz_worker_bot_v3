@@ -20,19 +20,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("⛔️ Доступ лише для працівників EcoGlanz!")
         return
 
-    found = False
-    for city, ids in WORKERS.items():
-        if user_id in ids:
-            context.user_data["city"] = city
-            found = True
-            break
-
-    if not found:
-        await update.message.reply_text("❌ У вас немає доступу до системи. Зверніться до адміністратора.")
-        return
-
     await update.message.reply_text(
-        f"✅ Вас розпізнано як працівника міста {context.user_data['city']}\n"
+        f"✅ Вас розпізнано як працівника!\n"
         "Надішліть команду /orders щоб переглянути доступні заявки."
     )
 
@@ -43,17 +32,13 @@ async def list_orders(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("⛔️ Доступ лише для працівників EcoGlanz!")
         return
 
-    city = context.user_data.get("city")
-    if not city:
-        await update.message.reply_text("⚠️ Спочатку надішліть /start для вибору міста.")
-        return
-
     # --- Підключення до Google Sheets ---
     try:
         scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
         creds = ServiceAccountCredentials.from_json_keyfile_name("eco-glanz-bot-key.json", scope)
         client = gspread.authorize(creds)
-        sheet = client.open("EcoGlanzOrders").worksheet(city)
+        # !!! ПРАЦЮЄМО ЛИШЕ З ОДНИМ АРКУШЕМ "Замовлення" у новій таблиці !!!
+        sheet = client.open("EcoGlanzOrders2024").worksheet("Замовлення")
         records = sheet.get_all_records()
 
         found = 0
@@ -74,7 +59,7 @@ async def list_orders(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 await update.message.reply_text(text, reply_markup=keyboard)
 
         if found == 0:
-            await update.message.reply_text("😴 Немає доступних заявок у вашому місті.")
+            await update.message.reply_text("😴 Немає доступних заявок.")
     except Exception as e:
         await update.message.reply_text("⚠️ Помилка доступу до Google Таблиці.")
         print("Помилка:", e)
@@ -88,13 +73,13 @@ async def handle_take_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
 
-    city = context.user_data.get("city")
     order_index = int(query.data.split("_")[1])
     try:
         scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
         creds = ServiceAccountCredentials.from_json_keyfile_name("eco-glanz-bot-key.json", scope)
         client = gspread.authorize(creds)
-        sheet = client.open("EcoGlanzOrders").worksheet(city)
+        # !!! Лише аркуш "Замовлення" у новій таблиці !!!
+        sheet = client.open("EcoGlanzOrders2024").worksheet("Замовлення")
         # Змінити статус заявки на "Виконується"
         sheet.update_cell(order_index, 8, "Виконується")
         await query.edit_message_text("✅ Ви прийняли замовлення! Статус оновлено.")
