@@ -117,7 +117,7 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
 def main():
     # Можеш використати змінну середовища або підставити токен прямо тут
     TOKEN = os.getenv("CLIENT_BOT_TOKEN")
-    # TOKEN = "ТВОЙ_КЛИЕНТСКИЙ_БОТ_ТОКЕН"
+    # або замість цього: TOKEN = "ТВОЙ_КЛИЕНТСКИЙ_БОТ_ТОКЕН"
 
     app = ApplicationBuilder().token(TOKEN).build()
 
